@@ -15,7 +15,7 @@ make demo
 # http://127.0.0.1:8766/runtime-tests.html
 ```
 
-대화형 서버는 해당 터미널에서 Ctrl-C로 종료한다. demo/test의 자식 프로세스는 실행기가 보유한 PID 또는 컨테이너 ID로만 종료한다. 다른 서버를 포트 번호로 찾아 일괄 종료하지 않는다. 준비된 Python 환경이 없으면 먼저 `make setup`을 실행한다.
+서버는 Ctrl-C로 종료한다. demo/test는 자신이 만든 프로세스만 종료한다.
 
 ## 입력에서 출력까지
 
@@ -33,7 +33,7 @@ keyed diff는 제거 후 현재 목록을 모사하면서 이동·삽입 위치�
 
 ## 검증과 관찰
 
-83개 Node 시나리오와 실제 Chromium DOM에서의 핵심 component-state 테스트를 통과했다. 브라우저 카드 검색·정렬·즐겨찾기·상세 이동, MNIST와 별개인 이 앱의 375px 화면과 가로 넘침을 확인했다.
+7개 필수 Node 시나리오와 실제 Chromium DOM에서의 핵심 component-state 테스트를 통과했다. 브라우저 카드 검색·정렬·즐겨찾기·상세 이동, MNIST와 별개인 이 앱의 375px 화면과 가로 넘침을 확인했다.
 
 실행 환경·명령·exit code·원본 백업과 전체 결과는 이번 전환의 별도 작업 폴더에 기록한다. 새 기계에서는 같은 명령으로 직접 재검증한다. 수치가 기록되어 있다는 사실과 현재 실행 성공을 구분한다.
 
@@ -43,6 +43,8 @@ React 전체 호환·Next.js·SSR/hydration·Suspense·Server Components·JSX co
 
 W04 Fiber 구현은 기존 원본 저장소와 이력에 비교 자료로 남아 있고 이 런타임에는 합치지 않았다. Node의 작은 테스트 DOM 결과와 실제 브라우저 결과를 구분한다. 원격 PokeAPI 가용성은 오프라인 완료 조건에 포함하지 않는다.
 
-## 원본·학습 문서의 경계
+## 출처와 기여
 
-[원본 아카이브와 기여 구분](archive/README.md)을 확인한다. 이 저장소는 실행 코드·테스트·사용법·설계 근거를 소유한다. WIKI는 개념 정본을 소유하며 기존 정본·공통 색인·배포 파일을 이 작업에서 수정하지 않는다. SQL·PintOS와 RepoLM/음성 서비스는 이 프로그램의 실행 의존성이 아니다.
+[Jungle-12-303/virtual-dom-engine-demo](https://github.com/Jungle-12-303/virtual-dom-engine-demo)에서 이어 받은 학습용 파생본이다. 기준 원본 revision은 `6f3c48c198ca7c81cab4e72544747fde0d8192b0`이다. 원본 과제·팀 코드와 이후 개인 확장을 구분하며, 개별 기여는 Git author와 diff로 확인한다. 기존 저작권 표시는 소스에 유지한다.
+
+과거 문서·실험·기여 기록은 [정리 전 이력](https://github.com/woonyong-kr/lrn-react/tree/5e9a60f126cc1a2f6ad8df31c7db0f5a59fb929e)에서 확인할 수 있다. 실행법과 지원 계약은 이 README에 모았다. 개념·설계·실험 해석 자료는 개인 WIKI inbox에서 검토한 뒤 기존 정본에 흡수한다.

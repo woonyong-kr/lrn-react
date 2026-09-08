@@ -5,7 +5,8 @@
   <pre id="results">실행 중</pre>
   <script type="module">
     import { runComponentStateTests } from "./src/tests/component-state.test.js";
-    const results = await runComponentStateTests();
+    import { runAppTests } from "./src/tests/app.test.js";
+    const results = [...await runComponentStateTests(), ...await runAppTests()];
     document.querySelector("#results").textContent = JSON.stringify(
       {
         passed: results.filter((r) => r.passed).length,
