@@ -1,3 +1,4 @@
+globalThis.__CARD_SHOWCASE_DATA_MODE__ = new URLSearchParams(location.search).get('data') === 'remote' ? 'remote' : 'local';
 /*
  * Responsibility:
  * - Bootstraps the browser demo app.

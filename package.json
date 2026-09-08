@@ -1,7 +1,7 @@
 {
-  "name": "virtual-dom-engine",
-  "version": "0.1.0",
-  "description": "A React-like Virtual DOM / Diff / Patch learning engine with a demo page.",
+  "name": "lrn-react",
+  "version": "1.0.0",
+  "description": "A standalone component runtime with per-component Hooks and a runnable card collection.",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -34,5 +34,6 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "private": true
 }

@@ -1,6 +1,6 @@
 /*
  * Responsibility:
- * - 현재 활성 루트 컴포넌트와 Hook 호출 허용 상태를 추적한다.
+ * - 현재 렌더 중인 컴포넌트와 Hook 호출 허용 상태를 추적한다.
  * - 루트 렌더와 자식 resolver 사이에서 Hook 사용 가능 여부를 제어한다.
  *
  * Easy explanation:
@@ -59,5 +59,15 @@ export function runWithHooksDisabled(callback) {
   } finally {
     dispatcherState.component = previous.component;
     dispatcherState.allowHooks = previous.allowHooks;
+  }
+}
+
+export function withComponent(component, callback) {
+  const previous = { ...dispatcherState };
+  setCurrentComponent(component, { allowHooks: true });
+  try {
+    return callback();
+  } finally {
+    Object.assign(dispatcherState, previous);
   }
 }

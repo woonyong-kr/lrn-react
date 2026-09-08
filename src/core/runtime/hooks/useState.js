@@ -1,6 +1,6 @@
 /*
  * Responsibility:
- * - 루트 전용 state Hook을 제공한다.
+ * - 컴포넌트별 state Hook을 제공한다.
  *
  * Easy explanation:
  * - useState는 변수처럼 보이지만, 실제로는 hooks 배열 안의 상태 슬롯을 읽고 쓰는 함수다.

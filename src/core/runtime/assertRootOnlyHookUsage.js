@@ -1,12 +1,12 @@
 /*
  * Responsibility:
- * - Hook이 루트 렌더 본문에서만 사용되도록 강제한다.
+ * - Hook이 등록된 컴포넌트의 렌더 본문에서 사용되는지 확인한다.
  */
 
 import { areHooksAllowed } from "./currentDispatcher.js";
 
 export function assertRootOnlyHookUsage() {
-  // 활성 루트가 존재하더라도, 지금이 자식 resolver 구간이면 Hook 사용은 금지한다.
+  // 독립적으로 호출한 resolver 등 Hook 저장소가 없는 구간에서는 사용을 금지한다.
   if (!areHooksAllowed()) {
     throw new Error("Hooks are only supported in the root component render.");
   }

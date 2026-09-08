@@ -28,11 +28,14 @@ function flushScheduledUpdate(component, token) {
 }
 
 export function scheduleUpdate(component) {
+  component = component.rootOwner ?? component;
+  if (component.isRendering)
+    throw new Error("State updates during render are unsupported.");
   if (!component.isMounted) {
     return;
   }
 
-  if (component.batching === "microtask") {
+  if (component.batching === "microtask" || component.isCommitting) {
     // [업데이트 4-2] microtask 모드에서는 지금 즉시 update하지 않고 예약만 걸 수 있다.
     // 이미 예약이 있으면 같은 동기 구간의 여러 setState를 한 번의 update로 묶는다.
     if (component.scheduledUpdate && !component.scheduledUpdate.cancelled) {

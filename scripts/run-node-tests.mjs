@@ -1,3 +1,4 @@
+import { runComponentStateTests } from '../src/tests/component-state.test.js';
 import { runAppTests } from "../src/tests/app.test.js";
 import { installTestDomEnvironment } from "../src/tests/support/testDomEnvironment.js";
 import { runEngineTests } from "../src/tests/engine.test.js";
@@ -14,6 +15,7 @@ import { runVnodeTests } from "../src/tests/vnode.test.js";
 installTestDomEnvironment();
 
 const suites = [
+  { name: "component-state", run: runComponentStateTests },
   { name: "vnode", run: runVnodeTests },
   { name: "reconciler", run: runReconcilerTests },
   { name: "patch", run: runPatchTests },

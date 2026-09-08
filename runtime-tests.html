@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <meta charset="utf-8" /><title>lrn-react 브라우저 검증</title>
+  <h1>실제 DOM 컴포넌트 검증</h1>
+  <pre id="results">실행 중</pre>
+  <script type="module">
+    import { runComponentStateTests } from "./src/tests/component-state.test.js";
+    const results = await runComponentStateTests();
+    document.querySelector("#results").textContent = JSON.stringify(
+      {
+        passed: results.filter((r) => r.passed).length,
+        total: results.length,
+        results,
+      },
+      null,
+      2,
+    );
+    document.title = results.every((r) => r.passed)
+      ? "PASS lrn-react"
+      : "FAIL lrn-react";
+  </script>
+</html>

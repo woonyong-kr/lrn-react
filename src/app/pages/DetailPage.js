@@ -70,7 +70,7 @@ function renderSpritePreview(card, copy) {
           id: "detail-sprite-image",
           className: "detail-sprite-image",
           src: card.thumbUrl,
-          alt: `${displayName} game sprite`,
+          alt: `${displayName} thumbnail`,
         }),
         h("div", { className: "sprite-preview-caption" },
           h("strong", { className: "sprite-preview-title" }, displayName),

@@ -40,11 +40,21 @@ function getDataMode() {
   return globalThis.__CARD_SHOWCASE_DATA_MODE__ === "local" ? "local" : "remote";
 }
 
+
+function localCardArtwork(card, thumbnail = false) {
+  const colors = {fire: '#ef724c', water: '#4a9fce', electric: '#e9bb38', grass: '#74b068', ghost: '#8a72b0'};
+  const color = colors[card.types[0]] ?? '#808fa9';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${thumbnail ? 80 : 320}" height="${thumbnail ? 80 : 320}" viewBox="0 0 320 320"><rect width="320" height="320" rx="36" fill="${color}"/><circle cx="160" cy="135" r="78" fill="white" opacity=".2"/><text x="160" y="162" text-anchor="middle" font-size="68" fill="white" font-family="system-ui">${Number(card.number)}</text><text x="160" y="256" text-anchor="middle" font-size="24" fill="white" font-family="system-ui">${card.name}</text></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 function cloneDefaultCards() {
   // 샘플 카드 배열을 그대로 재사용하면 즐겨찾기 변경 같은 상태가 원본 상수까지
   // 오염될 수 있다. 그래서 렌더에 쓸 때는 항상 복사본을 만든다.
   return CARD_LIBRARY.map((card) => ({
     ...card,
+    imageUrl: localCardArtwork(card),
+    thumbUrl: localCardArtwork(card, true),
     types: card.types.slice(),
     baseStats: card.baseStats ? { ...card.baseStats } : null,
     isHydrated: true,

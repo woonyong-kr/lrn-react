@@ -230,29 +230,10 @@ export async function runRuntimeTests() {
         throw new Error("Expected textarea/select events to update state.");
       }
     }),
-    runCase("child components cannot use hooks", () => {
-      const root = document.createElement("div");
-
-      function InvalidChild() {
-        useState(0);
-        return h("div", null, "invalid");
-      }
-
-      function App() {
-        return h(InvalidChild, null);
-      }
-
-      let errorMessage = "";
-
-      try {
-        createApp({ root, component: App }).mount();
-      } catch (error) {
-        errorMessage = error.message;
-      }
-
-      if (!errorMessage.includes("Hooks are only supported in the root component render")) {
-        throw new Error("Expected child hook usage to throw a root-only hook error.");
-      }
+    runCase("hooks outside a mounted component dispatcher are rejected", () => {
+      let error = null;
+      try { useState(0); } catch (caught) { error = caught; }
+      if (!error) throw new Error("Hook call outside render was accepted.");
     }),
     runCase("hook count changes between renders throw an explicit error", () => {
       const root = document.createElement("div");

@@ -1,3 +1,4 @@
+import { disposeComponent } from "./resolveComponentTree.js";
 /*
  * Responsibility:
  * - 루트 컴포넌트 종료 시 예약 작업과 effect cleanup, DOM 정리를 수행한다.
@@ -9,7 +10,10 @@
  */
 
 import { cancelScheduledUpdate } from "./scheduleUpdate.js";
-import { clearCurrentComponent, getCurrentComponent } from "./currentDispatcher.js";
+import {
+  clearCurrentComponent,
+  getCurrentComponent,
+} from "./currentDispatcher.js";
 
 function clearRootElement(rootElement) {
   if (!rootElement) {
@@ -22,7 +26,12 @@ function clearRootElement(rootElement) {
 }
 
 export function unmountComponent(component) {
+  component.isMounted = false;
   cancelScheduledUpdate(component);
+  for (const record of component.components?.values() ?? [])
+    disposeComponent(record);
+  component.components?.clear();
+  component.nextComponents?.clear();
   component.pendingEffects = [];
 
   for (const slot of component.hooks) {

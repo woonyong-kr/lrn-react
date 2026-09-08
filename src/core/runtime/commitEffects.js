@@ -33,6 +33,7 @@ export function commitEffects(component) {
 
     // [커밋 3] 이제 실제 effect 본문을 실행한다.
     // DOM patch가 끝난 뒤에야 effect 본문을 실행한다.
+    slot.deps = slot.nextDeps;
     const nextCleanup = slot.create();
     slot.cleanup = resolveCleanup(nextCleanup);
     // [커밋 4] effect가 사용한 deps를 현재 기준값으로 확정한다.

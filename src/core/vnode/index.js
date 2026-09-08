@@ -94,7 +94,7 @@ export function isElementVNode(vnode) {
  */
 export function getNodeIdentity(vnode, fallbackIndex) {
   if (vnode?.key !== null && vnode?.key !== undefined) {
-    return `key:${vnode.key}`;
+    return `key:${JSON.stringify([typeof vnode.key, vnode.key])}`;
   }
 
   return `index:${fallbackIndex}`;

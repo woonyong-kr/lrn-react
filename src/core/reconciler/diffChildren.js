@@ -70,7 +70,9 @@ function diffChildrenByIndex(oldChildren, newChildren, parentPath, walk) {
 }
 
 function hasAnyKey(children) {
-  return children.some((child) => child?.key !== null && child?.key !== undefined);
+  return children.some(
+    (child) => child?.key !== null && child?.key !== undefined,
+  );
 }
 
 function buildKeyedMap(children) {
@@ -84,41 +86,46 @@ function buildKeyedMap(children) {
 }
 
 function diffChildrenByKey(oldChildren, newChildren, parentPath, walk, mode) {
-  const patches = [];
-  // keyed 모드는 key 또는 identity를 기준으로 "같은 child가 어디로 이동했는지" 추적한다.
-  const oldMap = buildKeyedMap(oldChildren);
-  const visited = new Set();
-
-  newChildren.forEach((newChild, newIndex) => {
-    const identity = getNodeIdentity(newChild, newIndex);
-    const oldEntry = oldMap.get(identity);
-
-    if (!oldEntry) {
-      patches.push(createInsertPatch(parentPath, newIndex, newChild));
-      return;
-    }
-
-    visited.add(identity);
-
-    if (oldEntry.index !== newIndex && newChild?.key !== null && newChild?.key !== undefined) {
-      patches.push(createMovePatch(parentPath, oldEntry.index, newIndex, newChild.key));
-    }
-
-    appendIndexPatch(patches, walk(oldEntry.child, newChild, [...parentPath, newIndex]));
-  });
-
-  oldChildren.forEach((oldChild, oldIndex) => {
-    const identity = getNodeIdentity(oldChild, oldIndex);
-
-    if (!visited.has(identity)) {
-      patches.push(createRemovePatch(parentPath, oldIndex));
-    }
-  });
-
-  if (mode === DIFF_MODES.AUTO && !hasAnyKey(newChildren) && !hasAnyKey(oldChildren)) {
+  if (
+    mode === DIFF_MODES.AUTO &&
+    !hasAnyKey(newChildren) &&
+    !hasAnyKey(oldChildren)
+  ) {
     return diffChildrenByIndex(oldChildren, newChildren, parentPath, walk);
   }
-
+  const patches = [];
+  const oldMap = buildKeyedMap(oldChildren);
+  const nextIds = newChildren.map(getNodeIdentity);
+  const nextSet = new Set(nextIds);
+  if (nextSet.size !== nextIds.length)
+    throw new Error("Duplicate sibling key.");
+  const working = oldChildren.map(getNodeIdentity);
+  // Remove against old positions, then simulate every move/insert so all later
+  // indices refer to the DOM that the preceding patch actually produced.
+  for (let i = working.length - 1; i >= 0; i -= 1) {
+    if (!nextSet.has(working[i])) {
+      patches.push(createRemovePatch(parentPath, i));
+      working.splice(i, 1);
+    }
+  }
+  newChildren.forEach((child, index) => {
+    const id = nextIds[index];
+    const position = working.indexOf(id);
+    if (position < 0) {
+      patches.push(createInsertPatch(parentPath, index, child));
+      working.splice(index, 0, id);
+    } else {
+      if (position !== index) {
+        patches.push(createMovePatch(parentPath, position, index, child.key));
+        working.splice(position, 1);
+        working.splice(index, 0, id);
+      }
+      appendIndexPatch(
+        patches,
+        walk(oldMap.get(id).child, child, [...parentPath, index]),
+      );
+    }
+  });
   return patches;
 }
 
@@ -132,7 +139,13 @@ function diffChildrenByKey(oldChildren, newChildren, parentPath, walk, mode) {
  * - options.mode: auto | index | keyed
  * - walk: 노드 단위 재귀 diff 함수
  */
-export function diffChildren(oldChildren = [], newChildren = [], parentPath = [], options = {}, walk) {
+export function diffChildren(
+  oldChildren = [],
+  newChildren = [],
+  parentPath = [],
+  options = {},
+  walk,
+) {
   const mode = options.mode ?? DIFF_MODES.AUTO;
 
   if (mode === DIFF_MODES.INDEX) {
@@ -145,7 +158,13 @@ export function diffChildren(oldChildren = [], newChildren = [], parentPath = []
 
   if (hasAnyKey(oldChildren) || hasAnyKey(newChildren)) {
     // auto 모드에서는 key가 하나라도 보이면 keyed 전략을 택한다.
-    return diffChildrenByKey(oldChildren, newChildren, parentPath, walk, DIFF_MODES.AUTO);
+    return diffChildrenByKey(
+      oldChildren,
+      newChildren,
+      parentPath,
+      walk,
+      DIFF_MODES.AUTO,
+    );
   }
 
   return diffChildrenByIndex(oldChildren, newChildren, parentPath, walk);
