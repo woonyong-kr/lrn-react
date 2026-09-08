@@ -1,7 +1,6 @@
 # Week5 React-like Runtime
 
-week5 과제인 `Component · State · Hooks` 구현을 위해 만든 React-like UI 런타임 프로젝트입니다.  
-현재 시연 앱은 `카드 컬렉션 쇼케이스`이며, 포켓몬 공개 데이터를 활용해 `단일 루트 엔트리 기반 상태 기반 다중 페이지 SPA`를 구현했습니다.
+week5 과제인 React의 `Component · State · Hooks` 포함한 미니 React를 구현하고, 포켓몬 공개 데이터를 활용해 `포켓몬 카드 컬렉션` 데모를 `단일 루트 기반 다중 페이지 SPA(Single Page Application)`으로 구현했습니다.
 
 이 저장소의 장기 React 호환 문서는 [archive/v2](./archive/v2)에 보관했고, 현재 기준 문서는 week5 제출용 v3 문서입니다.
 
@@ -36,10 +35,10 @@ week5 과제인 `Component · State · Hooks` 구현을 위해 만든 React-like
 
 ## 이 프로젝트가 보여주는 것
 
-이 프로젝트의 목적은 실제 React 전체를 복제하는 것이 아니라, week5 과제의 의도에 맞게 아래 핵심 개념을 직접 구현하고 설명 가능한 형태로 만드는 것입니다.
+이 프로젝트의 목적은 실제 React 전체를 복제하는 것이 아니라, week5 과제의 의도에 맞게 핵심 개념을 직접 구현하고 팀원 전체가 설명 가능한 형태로 이해하는 것을 목표로 했습니다.
 
 - 함수형 컴포넌트
-- 루트 전용 상태 관리
+- `hooks`
 - `useState`, `useEffect`, `useMemo`
 - Virtual DOM + Diff + Patch
 - 브라우저에서 동작하는 상호작용 데모

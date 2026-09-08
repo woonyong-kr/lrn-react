@@ -9,15 +9,18 @@
  * - React를 전혀 몰라도, "상태를 가진 루트 화면 관리자"라고 이해하면 된다.
  */
 
-import { createEngine } from "../engine/createEngine.js";
-import { setCurrentComponent, clearCurrentComponent } from "./currentDispatcher.js";
-import { resolveComponentTree } from "./resolveComponentTree.js";
-import { commitEffects } from "./commitEffects.js";
-import { unmountComponent } from "./unmountComponent.js";
+import {createEngine} from '../engine/createEngine.js';
+import {
+  setCurrentComponent,
+  clearCurrentComponent,
+} from './currentDispatcher.js';
+import {resolveComponentTree} from './resolveComponentTree.js';
+import {commitEffects} from './commitEffects.js';
+import {unmountComponent} from './unmountComponent.js';
 
 function ensureRootElement(root) {
   if (!(root instanceof Element)) {
-    throw new Error("FunctionComponent.mount requires a valid root Element.");
+    throw new Error('FunctionComponent.mount requires a valid root Element.');
   }
 }
 
@@ -26,31 +29,34 @@ function normalizeProps(props) {
 }
 
 function describePatch(patch) {
-  if (!patch || typeof patch !== "object") {
-    return "UNKNOWN_PATCH";
+  if (!patch || typeof patch !== 'object') {
+    return 'UNKNOWN_PATCH';
   }
 
-  if (patch.type === "SET_PROP" || patch.type === "REMOVE_PROP") {
+  if (patch.type === 'SET_PROP' || patch.type === 'REMOVE_PROP') {
     return `${patch.type}: ${patch.name}`;
   }
 
-  if (patch.type === "SET_EVENT" || patch.type === "REMOVE_EVENT") {
+  if (patch.type === 'SET_EVENT' || patch.type === 'REMOVE_EVENT') {
     return `${patch.type}: ${patch.name}`;
   }
-
   return patch.type;
 }
 
 function isDisplayPatch(patch) {
-  if (!patch || typeof patch !== "object") {
+  if (!patch || typeof patch !== 'object') {
     return false;
   }
 
-  if (patch.type === "SET_EVENT" || patch.type === "REMOVE_EVENT") {
+  if (patch.type === 'SET_EVENT' || patch.type === 'REMOVE_EVENT') {
     return false;
   }
 
-  if ((patch.type === "SET_PROP" || patch.type === "REMOVE_PROP") && typeof patch.name === "string" && patch.name.startsWith("data-")) {
+  if (
+    (patch.type === 'SET_PROP' || patch.type === 'REMOVE_PROP') &&
+    typeof patch.name === 'string' &&
+    patch.name.startsWith('data-')
+  ) {
     return false;
   }
 
@@ -64,11 +70,11 @@ function countDisplayPatches(patches = []) {
 function summarizePatchLabels(patches) {
   const rawLabels = patches.map(describePatch);
   const semanticLabels = rawLabels.filter((label) => {
-    if (label.startsWith("SET_EVENT") || label.startsWith("REMOVE_EVENT")) {
+    if (label.startsWith('SET_EVENT') || label.startsWith('REMOVE_EVENT')) {
       return false;
     }
 
-    if (label.startsWith("SET_PROP: data-")) {
+    if (label.startsWith('SET_PROP: data-')) {
       return false;
     }
 
@@ -82,8 +88,11 @@ function summarizePatchLabels(patches) {
       uniqueLabels.push(label);
     }
   }
-  const prioritizedLabels = uniqueLabels.includes("SET_PROP: src")
-    ? ["SET_PROP: src", ...uniqueLabels.filter((label) => label !== "SET_PROP: src")]
+  const prioritizedLabels = uniqueLabels.includes('SET_PROP: src')
+    ? [
+        'SET_PROP: src',
+        ...uniqueLabels.filter((label) => label !== 'SET_PROP: src'),
+      ]
     : uniqueLabels;
 
   return prioritizedLabels.slice(0, 6);
@@ -91,14 +100,14 @@ function summarizePatchLabels(patches) {
 
 export class FunctionComponent {
   constructor(renderFn, options = {}) {
-    if (typeof renderFn !== "function") {
-      throw new Error("FunctionComponent requires a render function.");
+    if (typeof renderFn !== 'function') {
+      throw new Error('FunctionComponent requires a render function.');
     }
 
     this.renderFn = renderFn;
-    this.name = options.name ?? renderFn.name ?? "FunctionComponent";
-    this.batching = options.batching ?? "sync";
-    this.diffMode = options.diffMode ?? "auto";
+    this.name = options.name ?? renderFn.name ?? 'FunctionComponent';
+    this.batching = options.batching ?? 'sync';
+    this.diffMode = options.diffMode ?? 'auto';
     this.historyLimit = options.historyLimit ?? null;
 
     // hooks:
@@ -130,7 +139,10 @@ export class FunctionComponent {
   }
 
   publishRuntimeSnapshot(reason) {
-    if (!this.runtimeBridge || typeof this.runtimeBridge.publish !== "function") {
+    if (
+      !this.runtimeBridge ||
+      typeof this.runtimeBridge.publish !== 'function'
+    ) {
       return;
     }
 
@@ -160,7 +172,7 @@ export class FunctionComponent {
     this.renderCount += 1;
 
     // 이제부터 루트 App 본문이 실행되는 동안 Hook 사용을 허용한다.
-    setCurrentComponent(this, { allowHooks: true });
+    setCurrentComponent(this, {allowHooks: true});
 
     try {
       // [업데이트 6-1] 루트 App 함수를 실행해 새 VNode 초안을 만든다.
@@ -172,7 +184,7 @@ export class FunctionComponent {
         // 첫 렌더에서는 Hook 개수를 기준선으로 저장한다.
         this.expectedHookCount = this.hookCursor;
       } else if (this.hookCursor !== this.expectedHookCount) {
-        throw new Error("Hook count changed between renders.");
+        throw new Error('Hook count changed between renders.');
       }
 
       return resolvedVNode;
@@ -181,7 +193,7 @@ export class FunctionComponent {
     }
   }
 
-  mount({ root, props } = {}) {
+  mount({root, props} = {}) {
     ensureRootElement(root);
 
     if (this.isMounted) {
@@ -190,7 +202,9 @@ export class FunctionComponent {
 
     // 같은 인스턴스는 문서 기준상 한 번만 mount 할 수 있다.
     if (this.hasMountedOnce) {
-      throw new Error("FunctionComponent instances cannot be mounted again after unmount.");
+      throw new Error(
+        'FunctionComponent instances cannot be mounted again after unmount.',
+      );
     }
 
     // [시작 6] 전달받은 root DOM을 루트 컴포넌트 인스턴스에 저장한다.
@@ -216,14 +230,14 @@ export class FunctionComponent {
 
     // [시작 9] 최초 DOM이 실제로 붙은 뒤에만 effect를 실행해야 하므로 마지막에 commit한다.
     commitEffects(this);
-    this.publishRuntimeSnapshot("mount");
+    this.publishRuntimeSnapshot('mount');
 
     return nextVNode;
   }
 
   update(nextProps) {
     if (!this.isMounted || !this.engine) {
-      throw new Error("FunctionComponent.update requires a mounted component.");
+      throw new Error('FunctionComponent.update requires a mounted component.');
     }
 
     if (arguments.length > 0) {
@@ -246,7 +260,7 @@ export class FunctionComponent {
 
     // [업데이트 9] document.title, localStorage, fetch 후처리 같은 useEffect는 항상 patch 뒤에 실행한다.
     commitEffects(this);
-    this.publishRuntimeSnapshot("update");
+    this.publishRuntimeSnapshot('update');
 
     return {
       vnode: nextVNode,
@@ -261,6 +275,6 @@ export class FunctionComponent {
 
     // 실제 cleanup 로직은 별도 모듈로 분리해 책임을 단순하게 유지한다.
     unmountComponent(this);
-    this.publishRuntimeSnapshot("unmount");
+    this.publishRuntimeSnapshot('unmount');
   }
 }
