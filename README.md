@@ -46,6 +46,6 @@ W04 Fiber 구현은 기존 원본 저장소와 이력에 비교 자료로 남아
 
 ## 출처와 기여
 
-[Jungle-12-303/virtual-dom-engine-demo](https://github.com/Jungle-12-303/virtual-dom-engine-demo)에서 이어 받은 학습용 파생본이다. 기준 원본 revision은 `6f3c48c198ca7c81cab4e72544747fde0d8192b0`이다. 원본 과제·팀 코드와 이후 개인 확장을 구분하며, 개별 기여는 Git author와 diff로 확인한다. 기존 저작권 표시는 소스에 유지한다.
+[Jungle-12-303/week5-team1-react2](https://github.com/Jungle-12-303/week5-team1-react2)(이전 이름 `virtual-dom-engine-demo`)에서 이어 받은 학습용 파생본이다. 기준 원본 revision은 `6f3c48c198ca7c81cab4e72544747fde0d8192b0`이다. 원본 과제·팀 코드와 이후 개인 확장은 Git author와 diff로 구분하며, 기존 저작권 표시는 소스에 유지한다.
 
 기존 VDOM 엔진과 카드 앱에 컴포넌트별 Hook 수명 관리와 오프라인 데이터를 더했다. W04·W05 단계의 설계와 실험은 [정리 전 이력](https://github.com/woonyong-kr/lrn-react/tree/5e9a60f126cc1a2f6ad8df31c7db0f5a59fb929e)에서 확인할 수 있다.
