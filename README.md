@@ -1,6 +1,6 @@
 # lrn-react
 
-상태를 가진 컴포넌트를 렌더링하는 작은 UI 런타임. 핵심 엔진을 실제 입력으로 실행하고 결과와 내부 동작을 확인하는 독립 프로그램이다.
+컴포넌트의 상태가 바뀌면 어떤 DOM을 고쳐야 하는지 구현한 작은 JavaScript UI 런타임이다. 함수형 컴포넌트, Hook, VDOM 비교와 DOM patch를 직접 연결했고, 카드 검색·정렬·즐겨찾기 앱을 이 런타임으로 실행한다.
 
 ## 실행
 
@@ -8,14 +8,13 @@ Node.js 18 이상·npm·Python 3가 필요하다. 검증 환경은 Node 22다. �
 
 ```sh
 make setup
-make test
 make demo
 # 브라우저: http://127.0.0.1:8766
 # 실제 브라우저에서 반복 가능한 핵심 계약 테스트
 # http://127.0.0.1:8766/runtime-tests.html
 ```
 
-서버는 Ctrl-C로 종료한다. demo/test는 자신이 만든 프로세스만 종료한다.
+서버는 Ctrl-C로 종료한다. 카드를 정렬하거나 즐겨찾기를 바꾸면 Inspector에서 render와 patch 기록을 함께 볼 수 있다.
 
 ## 입력에서 출력까지
 
@@ -25,17 +24,19 @@ W05의 VDOM·diff·patch와 카드 컬렉션을 기반으로 컴포넌트별 use
 
 `createApp({root, component, batching: "microtask"})`로 같은 tick의 상태 변경을 한 번에 처리한다. 기본 API batching은 기존 sync를 유지하며 실제 카드 앱은 microtask를 사용한다. commit 중 state 변경은 다음 microtask로 예약한다. effect는 DOM 반영 이후 실행하고 제거된 컴포넌트의 cleanup을 한 번 호출한다. 제거된 인스턴스의 setter는 no-op이다.
 
-keyed diff는 제거 후 현재 목록을 모사하면서 이동·삽입 위치를 계산한다. 예전 [b,a] → [a] 전환에서 a를 옮긴 후 잘못 삭제하던 오류를 수정했다. DOM 속성·event 추가/교체/제거와 Inspector를 유지한다.
+keyed diff는 항목을 제거한 뒤 남은 목록을 기준으로 이동·삽입 위치를 계산한다. `[b,a] → [a]`처럼 삭제와 순서 변경이 겹쳐도 남아야 할 항목을 유지하기 위한 순서다. DOM 속성·이벤트의 추가·교체·제거도 patch에서 처리한다.
 
 기본 브라우저 모드는 6개 로컬 카드와 직접 생성한 SVG 도형을 사용해 외부 API·이미지 다운로드 없이 동작한다. 이름과 기존 metadata는 학습용 예제다. `?data=remote`를 명시하면 기존 PokeAPI 경로를 사용한다. 검색·정렬·즐겨찾기·화면 이동을 수행하면서 Inspector에서 patch와 render 횟수를 볼 수 있다.
 
-구현을 읽는 순서: `src/core/runtime/resolveComponentTree.js`, `src/core/reconciler/diffChildren.js`, `src/core/renderer-dom/patch.js`, `src/app/App.js`.
+컴포넌트별 상태의 수명은 [`resolveComponentTree.js`](src/core/runtime/resolveComponentTree.js), 목록 비교는 [`diffChildren.js`](src/core/reconciler/diffChildren.js), DOM 반영은 [`patch.js`](src/core/renderer-dom/patch.js), 실제 사용 예는 [`App.js`](src/app/App.js)에서 볼 수 있다.
 
 ## 검증과 관찰
 
-7개 필수 Node 시나리오와 실제 Chromium DOM에서의 핵심 component-state 테스트를 통과했다. 브라우저 카드 검색·정렬·즐겨찾기·상세 이동, MNIST와 별개인 이 앱의 375px 화면과 가로 넘침을 확인했다.
+```sh
+make test
+```
 
-실행 환경·명령·exit code·원본 백업과 전체 결과는 이번 전환의 별도 작업 폴더에 기록한다. 새 기계에서는 같은 명령으로 직접 재검증한다. 수치가 기록되어 있다는 사실과 현재 실행 성공을 구분한다.
+Node에서는 컴포넌트 상태 분리, key와 type에 따른 재사용·교체, batching과 cleanup을 검사하고 배포용 모듈을 빌드한다. 실제 DOM 검사는 서버 실행 후 [runtime-tests.html](runtime-tests.html)을 열어 확인한다. 카드 앱에서는 정렬 후 즐겨찾기가 같은 카드에 남는지, 상세 화면을 오갔다가 돌아와도 화면과 상태가 맞는지 살펴볼 수 있다.
 
 ## 지원 범위와 한계
 
@@ -47,4 +48,4 @@ W04 Fiber 구현은 기존 원본 저장소와 이력에 비교 자료로 남아
 
 [Jungle-12-303/virtual-dom-engine-demo](https://github.com/Jungle-12-303/virtual-dom-engine-demo)에서 이어 받은 학습용 파생본이다. 기준 원본 revision은 `6f3c48c198ca7c81cab4e72544747fde0d8192b0`이다. 원본 과제·팀 코드와 이후 개인 확장을 구분하며, 개별 기여는 Git author와 diff로 확인한다. 기존 저작권 표시는 소스에 유지한다.
 
-과거 문서·실험·기여 기록은 [정리 전 이력](https://github.com/woonyong-kr/lrn-react/tree/5e9a60f126cc1a2f6ad8df31c7db0f5a59fb929e)에서 확인할 수 있다. 실행법과 지원 계약은 이 README에 모았다. 개념·설계·실험 해석 자료는 개인 WIKI inbox에서 검토한 뒤 기존 정본에 흡수한다.
+기존 VDOM 엔진과 카드 앱에 컴포넌트별 Hook 수명 관리와 오프라인 데이터를 더했다. W04·W05 단계의 설계와 실험은 [정리 전 이력](https://github.com/woonyong-kr/lrn-react/tree/5e9a60f126cc1a2f6ad8df31c7db0f5a59fb929e)에서 확인할 수 있다.
