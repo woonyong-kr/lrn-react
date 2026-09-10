@@ -1,48 +1,37 @@
-# lrn-react
+# ⚛️ lrn-react
 
-컴포넌트의 상태가 바뀌면 어떤 DOM을 고쳐야 하는지 구현한 작은 JavaScript UI 런타임이다. 함수형 컴포넌트, Hook, VDOM 비교와 DOM patch를 직접 연결했고, 카드 검색·정렬·즐겨찾기 앱을 이 런타임으로 실행한다.
+컴포넌트 상태 변경을 실제 DOM에 반영하는 작은 JavaScript UI 런타임입니다. Hook·VDOM·keyed diff·patch를 직접 연결하고 카드 검색·정렬·즐겨찾기 앱으로 실행합니다.
+
+[컴포넌트 렌더링 Wiki](https://docs.woonyong.com/wiki/frontend-topic-556b062c7529/) · [카드 앱](src/app/App.js)
 
 ## 실행
 
-Node.js 18 이상·npm·Python 3가 필요하다. 검증 환경은 Node 22다. 런타임은 외부 React 패키지에 의존하지 않는다.
+Node.js 18 이상, npm, Python 3가 필요합니다. 확인한 실행 환경은 Node 22이며 외부 React 패키지에 의존하지 않습니다.
 
 ```sh
 make setup
 make demo
 # 브라우저: http://127.0.0.1:8766
-# 실제 브라우저에서 반복 가능한 핵심 계약 테스트
-# http://127.0.0.1:8766/runtime-tests.html
-```
-
-서버는 Ctrl-C로 종료한다. 카드를 정렬하거나 즐겨찾기를 바꾸면 Inspector에서 render와 patch 기록을 함께 볼 수 있다.
-
-## 입력에서 출력까지
-
-h/component + 상태 변경 → 컴포넌트별 Hook record → resolved VDOM → keyed diff → 실제 DOM patch → effect/cleanup
-
-W05의 VDOM·diff·patch와 카드 컬렉션을 기반으로 컴포넌트별 useState·useEffect·useMemo를 제공한다. 부모 경로·key·함수 type으로 Hook record를 식별한다. 같은 함수의 여러 인스턴스, keyed 순서 변경, type 교체와 unmount를 구분한다.
-
-`createApp({root, component, batching: "microtask"})`로 같은 tick의 상태 변경을 한 번에 처리한다. 기본 API batching은 기존 sync를 유지하며 실제 카드 앱은 microtask를 사용한다. commit 중 state 변경은 다음 microtask로 예약한다. effect는 DOM 반영 이후 실행하고 제거된 컴포넌트의 cleanup을 한 번 호출한다. 제거된 인스턴스의 setter는 no-op이다.
-
-keyed diff는 항목을 제거한 뒤 남은 목록을 기준으로 이동·삽입 위치를 계산한다. `[b,a] → [a]`처럼 삭제와 순서 변경이 겹쳐도 남아야 할 항목을 유지하기 위한 순서다. DOM 속성·이벤트의 추가·교체·제거도 patch에서 처리한다.
-
-기본 브라우저 모드는 6개 로컬 카드와 직접 생성한 SVG 도형을 사용해 외부 API·이미지 다운로드 없이 동작한다. 이름과 기존 metadata는 학습용 예제다. `?data=remote`를 명시하면 기존 PokeAPI 경로를 사용한다. 검색·정렬·즐겨찾기·화면 이동을 수행하면서 Inspector에서 patch와 render 횟수를 볼 수 있다.
-
-컴포넌트별 상태의 수명은 [`resolveComponentTree.js`](src/core/runtime/resolveComponentTree.js), 목록 비교는 [`diffChildren.js`](src/core/reconciler/diffChildren.js), DOM 반영은 [`patch.js`](src/core/renderer-dom/patch.js), 실제 사용 예는 [`App.js`](src/app/App.js)에서 볼 수 있다.
-
-## 검증과 관찰
-
-```sh
 make test
 ```
 
-Node에서는 컴포넌트 상태 분리, key와 type에 따른 재사용·교체, batching과 cleanup을 검사하고 배포용 모듈을 빌드한다. 실제 DOM 검사는 서버 실행 후 [runtime-tests.html](runtime-tests.html)을 열어 확인한다. 카드 앱에서는 정렬 후 즐겨찾기가 같은 카드에 남는지, 상세 화면을 오갔다가 돌아와도 화면과 상태가 맞는지 살펴볼 수 있다.
+기본 모드는 로컬 카드와 SVG를 사용해 외부 API 없이 동작합니다. 검색·정렬·즐겨찾기·화면 전환을 해 보고 Inspector의 render·patch 기록을 확인합니다. 서버는 Ctrl-C로 종료합니다. 기존 PokeAPI 데이터는 `?data=remote`를 명시할 때만 사용합니다.
 
-## 지원 범위와 한계
+## 구현과 설계
 
-React 전체 호환·Next.js·SSR/hydration·Suspense·Server Components·JSX compiler·Fiber scheduler를 제공하지 않는다. 컴포넌트는 단일 VNode를 반환하며 Hook 순서와 개수는 고정해야 한다. key는 형제 사이에서 유일해야 한다. component render 중 setState는 지원하지 않는다. root render 전체를 다시 계산하므로 React의 선택적 subtree scheduling이나 동시 렌더링 성능을 주장하지 않는다.
+컴포넌트·상태 변경 → Hook record → VDOM → keyed diff → DOM patch → effect/cleanup으로 이어집니다.
 
-W04 Fiber 구현은 기존 원본 저장소와 이력에 비교 자료로 남아 있고 이 런타임에는 합치지 않았다. Node의 작은 테스트 DOM 결과와 실제 브라우저 결과를 구분한다. 원격 PokeAPI 가용성은 오프라인 완료 조건에 포함하지 않는다.
+- [resolveComponentTree.js](src/core/runtime/resolveComponentTree.js): `h`, 함수형 컴포넌트, `useState`·`useEffect`·`useMemo`. 부모 경로·key·함수 type으로 인스턴스를 구분합니다.
+- [diffChildren.js](src/core/reconciler/diffChildren.js): 삭제 후 남은 목록을 기준으로 이동·삽입 위치를 계산해 재정렬 시 항목의 정체성을 유지합니다.
+- [patch.js](src/core/renderer-dom/patch.js): DOM 속성·이벤트 추가·교체·제거. effect는 DOM 반영 후 실행하고 unmount에서 cleanup을 호출합니다.
+
+카드 앱은 `createApp({root, component, batching: "microtask"})`로 같은 tick의 상태 변경을 묶습니다. API 기본값은 sync입니다. commit 중 상태 변경은 다음 microtask로 예약하며 제거된 인스턴스의 setter는 no-op입니다.
+
+`make test`는 Node에서 상태 분리·key/type 교체·batching·cleanup을 검사하고 모듈을 빌드합니다. 서버 실행 후 [브라우저 검사 화면](http://127.0.0.1:8766/runtime-tests.html)에서 실제 DOM 결과도 확인할 수 있습니다.
+
+## 현재 범위
+
+컴포넌트는 단일 VNode를 반환하고 Hook 순서·개수를 고정해야 합니다. key는 형제 사이에서 유일해야 하며 render 중 setState는 지원하지 않습니다. root 전체를 다시 계산하는 런타임으로 React 전체 호환·동시 렌더링·SSR·JSX compiler는 제공하지 않습니다. W04 Fiber 구현은 비교 자료로 보존하며 이 런타임에 합치지 않았습니다.
 
 ## 출처와 기여
 
